@@ -1,0 +1,15 @@
+postgres-# \c learning_portal
+You are now connected to database "learning_portal" as user "postgres".
+
+
+learning_portal-# \dt
+            List of relations
+ Schema |    Name     | Type  |  Owner
+--------+-------------+-------+----------
+ public | chapters    | table | postgres
+ public | courses     | table | postgres
+ public | enrollments | table | postgres
+ public | lessons     | table | postgres
+ public | progress    | table | postgres
+ public | users       | table | postgres
+(6 rows)

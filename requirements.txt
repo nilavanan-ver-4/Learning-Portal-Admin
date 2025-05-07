@@ -1,0 +1,11 @@
+Flask
+SQLAlchemy
+flask_sqlalchemy
+psycopg2-binary
+PyJWT
+Flask-JWT-Extended
+minio  # Changed from python-minio
+WTForms
+dotenv
+flask_migrate
+flask-jwt-extended

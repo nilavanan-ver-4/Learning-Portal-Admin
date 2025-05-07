@@ -1,0 +1,6 @@
+CREATE DATABASE Learning_portal;
+CREATE USER learning_user WITH PASSWORD '1234';
+GRANT ALL PRIVILEGES ON DATABASE learning_portal TO learning_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO learning_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO learning_user;
+GRANT CREATE ON SCHEMA public TO learning_user; 
