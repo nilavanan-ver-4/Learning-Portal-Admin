@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logout</title>
+    <script>
+        // Clear the JWT token from localStorage
+        localStorage.removeItem('access_token');
+        // Redirect to the login page
+        window.location.href = '{{ url_for("main.login") }}';
+    </script>
+</head>
+<body>
+    <p>Logging out...</p>
+</body>
+</html>

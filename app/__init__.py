@@ -44,6 +44,8 @@ def create_app():
     from .routes import main
     app.register_blueprint(main)
 
+    
+
     # Test database connection
     with app.app_context():
         try:

@@ -1,6 +1,72 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Check if a JWT token is stored in localStorage
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
 
-{% block content %}
-    <h1>Welcome to the Learning Portal!</h1>
-    <p>Explore a vast library of courses and enhance your skills. Our platform offers courses for students, teachers, and admins.</p>
-{% endblock %}
+        // Navigate to protected routes with token in Authorization header
+        async function navigateToProtected(url) {
+            const token = getToken();
+            if (!token) {
+                window.location.href = "{{ url_for('main.login') }}";
+                return;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    window.location.href = url; // Redirect to the page
+                } else {
+                    window.location.href = "{{ url_for('main.login') }}";
+                }
+            } catch (error) {
+                console.error('Error navigating to protected route:', error);
+                window.location.href = "{{ url_for('main.login') }}";
+            }
+        }
+
+        // On page load, check if the user is on a protected route
+        window.onload = function() {
+            const protectedRoutes = ['/upload', '/courses/new', '/chapters', '/lessons', '/enroll'];
+            const currentPath = window.location.pathname;
+            const isProtectedRoute = protectedRoutes.some(route => currentPath.startsWith(route));
+            if (isProtectedRoute && !getToken()) {
+                window.location.href = "{{ url_for('main.login') }}";
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Welcome to the Learning Portal</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if user %}
+        <p>Welcome, {{ user.first_name }} {{ user.last_name }} ({{ user.role }})!</p>
+        <a href="#" onclick="navigateToProtected('{{ url_for('main.upload') }}')">Upload File</a> |
+        <a href="{{ url_for('main.list_courses') }}">View Courses</a> |
+        {% if user.role in ['teacher', 'admin'] %}
+            <a href="#" onclick="navigateToProtected('{{ url_for('main.create_course') }}')">Create Course</a> |
+        {% endif %}
+        <a href="{{ url_for('main.logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('main.register') }}">Register</a> |
+        <a href="{{ url_for('main.login') }}">Login</a> |
+        <a href="{{ url_for('main.list_courses') }}">View Courses</a>
+    {% endif %}
+</body>
+</html>

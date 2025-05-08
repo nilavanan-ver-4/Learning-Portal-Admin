@@ -9,3 +9,5 @@ WTForms
 dotenv
 flask_migrate
 flask-jwt-extended
+email_validator
+flask-wtf

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Courses</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Check if a JWT token is stored in localStorage
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        // Handle form submission for protected routes
+        async function submitProtectedForm(event, url) {
+            event.preventDefault();
+            const token = getToken();
+            if (!token) {
+                window.location.href = "{{ url_for('main.login') }}";
+                return;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    window.location.href = url; // Redirect to refresh the page
+                } else {
+                    window.location.href = "{{ url_for('main.login') }}";
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                window.location.href = "{{ url_for('main.login') }}";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Available Courses</h1>
+    <ul>
+    {% for course in courses %}
+        <li>
+            <a href="{{ url_for('main.view_course', course_id=course.id) }}">{{ course.title }}</a> - 
+            {{ course.description }}
+            <form onsubmit="submitProtectedForm(event, '{{ url_for('main.enroll_course', course_id=course.id) }}')" style="display:inline;">
+                <button type="submit">Enroll</button>
+            </form>
+        </li>
+    {% else %}
+        <li>No courses available.</li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('main.index') }}">Back to Home</a>
+</body>
+</html>

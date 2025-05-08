@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Check if a JWT token is stored in localStorage
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        // Navigate to protected routes with token in Authorization header
+        async function navigateToProtected(url) {
+            const token = getToken();
+            if (!token) {
+                window.location.href = "{{ url_for('main.login') }}";
+                return;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    window.location.href = url;
+                } else {
+                    window.location.href = "{{ url_for('main.login') }}";
+                }
+            } catch (error) {
+                console.error('Error navigating to protected route:', error);
+                window.location.href = "{{ url_for('main.login') }}";
+            }
+        }
+
+        // Handle form submission for protected routes
+        async function submitProtectedForm(event, url) {
+            event.preventDefault();
+            const token = getToken();
+            if (!token) {
+                window.location.href = "{{ url_for('main.login') }}";
+                return;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    window.location.href = url;
+                } else {
+                    window.location.href = "{{ url_for('main.login') }}";
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                window.location.href = "{{ url_for('main.login') }}";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>{{ course.title }}</h1>
+    <p>{{ course.description }}</p>
+    <h2>Chapters</h2>
+    <a href="#" onclick="navigateToProtected('{{ url_for('main.create_chapter', course_id=course.id) }}')">Add Chapter</a>
+    <ul>
+    {% for chapter in course.chapters | sort(attribute='chapter_order') %}
+        <li>
+            {{ chapter.title }} (Order: {{ chapter.chapter_order }})
+            <h3>Lessons</h3>
+            <a href="#" onclick="navigateToProtected('{{ url_for('main.create_lesson', chapter_id=chapter.id) }}')">Add Lesson</a>
+            <ul>
+            {% for lesson in chapter.lessons | sort(attribute='lesson_order') %}
+                <li>
+                    {{ lesson.title }} (Type: {{ lesson.lesson_type }}, Order: {{ lesson.lesson_order }}{% if lesson.duration %}, Duration: {{ lesson.duration }}s{% endif %})
+                    {% if lesson.minio_url %}
+                        <br>
+                        {% if lesson.lesson_type == 'video' %}
+                            <video width="320" height="240" controls>
+                                <source src="{{ lesson.minio_url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        {% elif lesson.lesson_type == 'document' %}
+                            <a href="{{ lesson.minio_url }}" target="_blank">Download Document</a>
+                        {% endif %}
+                    {% endif %}
+                    <form onsubmit="submitProtectedForm(event, '{{ url_for('main.complete_lesson', lesson_id=lesson.id) }}')" style="display:inline;">
+                        <button type="submit">Mark as Complete</button>
+                    </form>
+                </li>
+            {% else %}
+                <li>No lessons in this chapter.</li>
+            {% endfor %}
+            </ul>
+        </li>
+    {% else %}
+        <li>No chapters in this course.</li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('main.list_courses') }}">Back to Courses</a>
+</body>
+</html>

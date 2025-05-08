@@ -2,21 +2,42 @@
 <html>
 <head>
     <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>Register</h1>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <p style="color: {{ 'red' if category == 'error' else 'green' }}">{{ message }}</p>
+                <p class="{{ category }}">{{ message }}</p>
             {% endfor %}
         {% endif %}
     {% endwith %}
     <form method="POST">
-        <p>{{ form.email.label }}: {{ form.email() }}</p>
-        <p>{{ form.first_name.label }}: {{ form.first_name() }}</p>
-        <p>{{ form.last_name.label }}: {{ form.last_name() }}</p>
-        <p>{{ form.password.label }}: {{ form.password() }}</p>
+        <p>
+            {{ form.email.label }}: {{ form.email() }}
+            {% if form.email.errors %}
+                <span class="error">{{ form.email.errors[0] }}</span>
+            {% endif %}
+        </p>
+        <p>
+            {{ form.password.label }}: {{ form.password() }}
+            {% if form.password.errors %}
+                <span class="error">{{ form.password.errors[0] }}</span>
+            {% endif %}
+        </p>
+        <p>
+            {{ form.first_name.label }}: {{ form.first_name() }}
+            {% if form.first_name.errors %}
+                <span class="error">{{ form.first_name.errors[0] }}</span>
+            {% endif %}
+        </p>
+        <p>
+            {{ form.last_name.label }}: {{ form.last_name() }}
+            {% if form.last_name.errors %}
+                <span class="error">{{ form.last_name.errors[0] }}</span>
+            {% endif %}
+        </p>
         <button type="submit">Register</button>
     </form>
     <a href="{{ url_for('main.login') }}">Already have an account? Login</a>

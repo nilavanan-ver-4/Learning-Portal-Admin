@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload File</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Check if a JWT token is stored in localStorage
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        // Handle form submission for protected routes
+        async function submitProtectedForm(event, url) {
+            event.preventDefault();
+            const token = getToken();
+            if (!token) {
+                window.location.href = "{{ url_for('main.login') }}";
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                if (response.ok) {
+                    window.location.href = url;
+                } else {
+                    window.location.href = "{{ url_for('main.login') }}";
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                window.location.href = "{{ url_for('main.login') }}";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Upload a File</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form method="POST" enctype="multipart/form-data" onsubmit="submitProtectedForm(event, '{{ url_for('main.upload') }}')">
+        <p>{{ form.file.label }}: {{ form.file() }}</p>
+        <button type="submit">Upload</button>
+    </form>
+    <a href="{{ url_for('main.index') }}">Back to Home</a>
+</body>
+</html>
