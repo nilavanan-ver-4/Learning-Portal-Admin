@@ -1,72 +1,71 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Home</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script>
-        // Check if a JWT token is stored in localStorage
-        function getToken() {
-            return localStorage.getItem('access_token');
-        }
+{% extends "base.html" %}
 
-        // Navigate to protected routes with token in Authorization header
-        async function navigateToProtected(url) {
-            const token = getToken();
-            if (!token) {
-                window.location.href = "{{ url_for('main.login') }}";
-                return;
-            }
+{% block title %}Home - Learning Portal{% endblock %}
 
-            try {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (response.ok) {
-                    window.location.href = url; // Redirect to the page
-                } else {
-                    window.location.href = "{{ url_for('main.login') }}";
-                }
-            } catch (error) {
-                console.error('Error navigating to protected route:', error);
-                window.location.href = "{{ url_for('main.login') }}";
-            }
-        }
-
-        // On page load, check if the user is on a protected route
-        window.onload = function() {
-            const protectedRoutes = ['/upload', '/courses/new', '/chapters', '/lessons', '/enroll'];
-            const currentPath = window.location.pathname;
-            const isProtectedRoute = protectedRoutes.some(route => currentPath.startsWith(route));
-            if (isProtectedRoute && !getToken()) {
-                window.location.href = "{{ url_for('main.login') }}";
-            }
-        };
-    </script>
-</head>
-<body>
-    <h1>Welcome to the Learning Portal</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+{% block content %}
+<div class="text-center">
+    <h2 class="text-3xl font-bold mb-6">Welcome to the Learning Portal</h2>
     {% if user %}
-        <p>Welcome, {{ user.first_name }} {{ user.last_name }} ({{ user.role }})!</p>
-        <a href="#" onclick="navigateToProtected('{{ url_for('main.upload') }}')">Upload File</a> |
-        <a href="{{ url_for('main.list_courses') }}">View Courses</a> |
-        {% if user.role in ['teacher', 'admin'] %}
-            <a href="#" onclick="navigateToProtected('{{ url_for('main.create_course') }}')">Create Course</a> |
-        {% endif %}
-        <a href="{{ url_for('main.logout') }}">Logout</a>
+        <p class="text-lg mb-4">Welcome, {{ user.first_name }} {{ user.last_name }} ({{ user.role | capitalize }})!</p>
+        <div class="flex justify-center space-x-4">
+            <a href="{{ url_for('main.list_courses') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">View Courses</a>
+            {% if user.role in ['teacher', 'admin'] %}
+                <a href="#" onclick="navigateToProtected('{{ url_for('main.create_course') }}')" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Create Course</a>
+                <a href="{{ url_for('main.teacher_home') }}" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Dashboard</a>
+            {% elif user.role == 'student' %}
+                <a href="{{ url_for('main.student_home') }}" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Dashboard</a>
+            {% endif %}
+            <a href="#" onclick="navigateToProtected('{{ url_for('main.upload') }}')" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700">Upload File</a>
+        </div>
     {% else %}
-        <a href="{{ url_for('main.register') }}">Register</a> |
-        <a href="{{ url_for('main.login') }}">Login</a> |
-        <a href="{{ url_for('main.list_courses') }}">View Courses</a>
+        <p class="text-lg mb-4">Join our community to access premium courses and resources.</p>
+        <div class="flex justify-center space-x-4">
+            <a href="{{ url_for('main.register') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Register</a>
+            <a href="{{ url_for('main.login') }}" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Login</a>
+            <a href="{{ url_for('main.list_courses') }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">View Courses</a>
+        </div>
     {% endif %}
-</body>
-</html>
+</div>
+<script>
+    // Check if a JWT token is stored in localStorage
+    function getToken() {
+        return localStorage.getItem('access_token');
+    }
+
+    // Navigate to protected routes with token in Authorization header
+    async function navigateToProtected(url) {
+        const token = getToken();
+        if (!token) {
+            window.location.href = "{{ url_for('main.login') }}";
+            return;
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                window.location.href = url; // Redirect to the page
+            } else {
+                window.location.href = "{{ url_for('main.login') }}";
+            }
+        } catch (error) {
+            console.error('Error navigating to protected route:', error);
+            window.location.href = "{{ url_for('main.login') }}";
+        }
+    }
+
+    // On page load, check if the user is on a protected route
+    window.onload = function() {
+        const protectedRoutes = ['/upload', '/courses/new', '/chapters', '/lessons', '/enroll', '/teacher', '/student'];
+        const currentPath = window.location.pathname;
+        const isProtectedRoute = protectedRoutes.some(route => currentPath.startsWith(route));
+        if (isProtectedRoute && !getToken()) {
+            window.location.href = "{{ url_for('main.login') }}";
+        }
+    };
+</script>
+{% endblock %}

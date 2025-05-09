@@ -1,45 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <h1>Register</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    <form method="POST">
-        <p>
-            {{ form.email.label }}: {{ form.email() }}
+{% extends "base.html" %}
+
+{% block title %}Register - Learning Portal{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Register</h2>
+    <form method="POST" class="space-y-4">
+        {{ form.hidden_tag() }}
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="{{ form.email.id }}">{{ form.email.label }}</label>
+            {{ form.email(class_="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300", required="required", **{"aria-describedby": "email-error"}) }}
             {% if form.email.errors %}
-                <span class="error">{{ form.email.errors[0] }}</span>
+                <span id="email-error" class="text-red-600 text-sm">{{ form.email.errors[0] }}</span>
             {% endif %}
-        </p>
-        <p>
-            {{ form.password.label }}: {{ form.password() }}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="{{ form.password.id }}">{{ form.password.label }}</label>
+            {{ form.password(class_="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300", required="required", **{"aria-describedby": "password-error"}) }}
             {% if form.password.errors %}
-                <span class="error">{{ form.password.errors[0] }}</span>
+                <span id="password-error" class="text-red-600 text-sm">{{ form.password.errors[0] }}</span>
             {% endif %}
-        </p>
-        <p>
-            {{ form.first_name.label }}: {{ form.first_name() }}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="{{ form.first_name.id }}">{{ form.first_name.label }}</label>
+            {{ form.first_name(class_="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300", required="required", **{"aria-describedby": "first-name-error"}) }}
             {% if form.first_name.errors %}
-                <span class="error">{{ form.first_name.errors[0] }}</span>
+                <span id="first-name-error" class="text-red-600 text-sm">{{ form.first_name.errors[0] }}</span>
             {% endif %}
-        </p>
-        <p>
-            {{ form.last_name.label }}: {{ form.last_name() }}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="{{ form.last_name.id }}">{{ form.last_name.label }}</label>
+            {{ form.last_name(class_="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300", required="required", **{"aria-describedby": "last-name-error"}) }}
             {% if form.last_name.errors %}
-                <span class="error">{{ form.last_name.errors[0] }}</span>
+                <span id="last-name-error" class="text-red-600 text-sm">{{ form.last_name.errors[0] }}</span>
             {% endif %}
-        </p>
-        <button type="submit">Register</button>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition-colors duration-200">Register</button>
     </form>
-    <a href="{{ url_for('main.login') }}">Already have an account? Login</a>
-</body>
-</html>
+    <p class="mt-4 text-center">
+        Already have an account? <a href="{{ url_for('main.login') }}" class="text-blue-600 hover:underline">Login</a>
+    </p>
+</div>
+{% endblock %}
