@@ -95,3 +95,19 @@ CREATE INDEX idx_lessons_chapter_id ON lessons(chapter_id);
 CREATE INDEX idx_enrollments_student_course ON enrollments(student_id, course_id);
 CREATE INDEX idx_progress_student_lesson ON progress(student_id, lesson_id);
 CREATE INDEX idx_progress_completed ON progress(completed); -- Added for progress tracking queries
+
+
+
+
+ALTER TABLE progress
+ADD COLUMN IF NOT EXISTS course_id INTEGER,
+ADD COLUMN IF NOT EXISTS completed_percentage DOUBLE PRECISION DEFAULT 0.0,
+ADD CONSTRAINT progress_course_id_fkey FOREIGN KEY (course_id) REFERENCES courses(course_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_student_lesson_unique
+ON progress (student_id, lesson_id)
+WHERE lesson_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_student_course_unique
+ON progress (student_id, course_id)
+WHERE course_id IS NOT NULL;

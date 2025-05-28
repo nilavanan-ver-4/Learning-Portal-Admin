@@ -18,10 +18,11 @@ class User(db.Model):
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
     role = db.Column(db.Enum(UserRole), default=UserRole.student, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=db.func.now())
-    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
-    deleted_at = db.Column(db.DateTime)
     last_login_at = db.Column(db.DateTime)
+    reset_token = db.Column(db.String(255))
+    deleted_at = db.Column(db.DateTime)
 
     enrollments = db.relationship("Enrollment", back_populates="student")
     progress = db.relationship("Progress", back_populates="student")
@@ -30,7 +31,7 @@ class User(db.Model):
 
     def set_password(self, password):
         from werkzeug.security import generate_password_hash
-        self.password_hash = generate_password_hash(password)
+        self.password_hash = generate_password_hash(password, method='scrypt')
 
     def check_password(self, password):
         from werkzeug.security import check_password_hash
@@ -55,7 +56,6 @@ class Course(db.Model):
     enrollments = db.relationship("Enrollment", back_populates="course")
     progress = db.relationship("Progress", back_populates="course", overlaps="enrollments")
     chapters = db.relationship("Chapter", back_populates="course")
-    # Renamed 'metadata' to 'course_metadata' to avoid conflict with SQLAlchemy's reserved name
     course_metadata = db.relationship("CourseMetadata", back_populates="course", uselist=False)
 
     def __repr__(self):
@@ -115,7 +115,7 @@ class Lesson(db.Model):
     lesson_order = db.Column(db.Integer, nullable=False)
     duration = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=db.func.now())
-    updated_at = db.Column(db.DateTime, onupdate=db.func.now())  # Fixed indentation and removed "Eclipse"
+    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     chapter = db.relationship("Chapter", back_populates="lessons")
     progress = db.relationship("Progress", back_populates="lesson")
@@ -164,7 +164,6 @@ class CourseMetadata(db.Model):
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-    # Updated back_populates to match the renamed relationship in Course
     course = db.relationship("Course", back_populates="course_metadata")
 
     def __repr__(self):

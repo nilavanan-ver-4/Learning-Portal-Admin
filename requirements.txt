@@ -11,3 +11,5 @@ flask_migrate
 flask-jwt-extended
 email_validator
 flask-wtf
+flask-limiter
+logging

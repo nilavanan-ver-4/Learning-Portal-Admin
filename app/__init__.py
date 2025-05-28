@@ -1,10 +1,12 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from minio import Minio
 from dotenv import load_dotenv
 import os
+import logging
 
 # Load environment variables from .env file
 load_dotenv()
@@ -12,7 +14,7 @@ load_dotenv()
 # Initialize Flask extensions
 db = SQLAlchemy()
 migrate = Migrate()
-jwt = JWTManager()
+limiter = Limiter(key_func=get_remote_address)  # Initialize Flask-Limiter with in-memory storage
 
 def create_app():
     app = Flask(__name__)
@@ -21,15 +23,21 @@ def create_app():
     from .config import Config
     app.config.from_object(Config)
 
-    # Optional: verify config loaded
-    print("Database connection successful!")
-    print(f"MINIO_ACCESS_KEY from env: {app.config['MINIO_ACCESS_KEY']}")
-    print(f"MINIO_SECRET_KEY from env: {app.config['MINIO_SECRET_KEY']}")
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)
+    app.logger.setLevel(logging.INFO)
+
+    # Verify config loaded
+    app.logger.info("Configuration loaded successfully!")
+    app.logger.info(f"MINIO_ACCESS_KEY from env: {app.config['MINIO_ACCESS_KEY']}")
+    app.logger.info(f"MINIO_SECRET_KEY from env: {app.config['MINIO_SECRET_KEY']}")
+    app.logger.info(f"SECRET_KEY from env: {app.config['SECRET_KEY']}")
+    app.logger.info(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
     # Initialize Flask extensions with the app
     db.init_app(app)
     migrate.init_app(app, db)
-    jwt.init_app(app)
+    limiter.init_app(app)  # Initialize Limiter with the app
 
     # Initialize MinIO client
     minio_client = Minio(
@@ -44,14 +52,12 @@ def create_app():
     from .routes import main
     app.register_blueprint(main)
 
-    
-
     # Test database connection
     with app.app_context():
         try:
             db.engine.connect()
-            print("Database connection successful!")
+            app.logger.info("Database connection successful!")
         except Exception as e:
-            print(f"Error connecting to database: {e}")
+            app.logger.error(f"Error connecting to database: {e}")
 
     return app

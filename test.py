@@ -1,4 +1,58 @@
 from app import create_app, db
+from app.models import User, Course, Enrollment, Progress
+
+app = create_app()
+with app.app_context():
+    # Check or create teacher
+    teacher = User.query.filter_by(email='teacher@example.com', deleted_at=None).first()
+    if not teacher:
+        teacher = User(email='teacher@example.com', role='teacher', first_name='Teacher', last_name='One')
+        teacher.set_password('123456')
+        db.session.add(teacher)
+        print("Created teacher user.")
+    else:
+        print(f"Teacher {teacher.email} already exists.")
+
+    # Check or create student
+    student = User.query.filter_by(email='nilalinuxa4n@gmail.com', deleted_at=None).first()
+    if not student:
+        student = User(email='nilalinuxa4n@gmail.com', role='student', first_name='Nila', last_name='Linux')
+        student.set_password('123456')
+        db.session.add(student)
+        print("Created student user.")
+    else:
+        print(f"Student {student.email} already exists.")
+
+    # Check if course exists
+    course = Course.query.filter_by(title='Python Basics', deleted_at=None).first()
+    if not course:
+        course = Course(title='Python Basics', description='Learn Python programming.', is_published=True, teacher_id=teacher.user_id)
+        db.session.add(course)
+        print("Created course.")
+    
+    db.session.commit()
+
+    # Check if enrollment exists
+    enrollment = Enrollment.query.filter_by(student_id=student.user_id, course_id=course.id).first()
+    if not enrollment:
+        enrollment = Enrollment(student_id=student.user_id, course_id=course.id)
+        db.session.add(enrollment)
+        print("Created enrollment.")
+
+    # Check if progress exists
+    progress = Progress.query.filter_by(student_id=student.user_id, course_id=course.id).first()
+    if not progress:
+        progress = Progress(student_id=student.user_id, course_id=course.id, completed_percentage=50.0)
+        db.session.add(progress)
+        print("Created progress.")
+    
+    db.session.commit()
+    print("Test data added successfully!")
+
+
+
+
+    """ from app import create_app, db
 from app.models import User
 from sqlalchemy.sql import text
 from minio import Minio
@@ -138,3 +192,4 @@ def test_minio_connection():
 if __name__ == "__main__":
     test_db_connection()
     test_minio_connection()
+ """

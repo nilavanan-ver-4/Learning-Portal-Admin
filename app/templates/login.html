@@ -1,77 +1,37 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}Login - Learning Portal{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}?v=4">
 {% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
-    <form id="login-form" method="POST" class="space-y-4">
-        {{ form.hidden_tag() }}
-        <div>
-            <label class="block text-sm font-medium text-gray-700" for="{{ form.email.id }}">{{ form.email.label }}</label>
-            {{ form.email(class_="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300", required="required", **{"aria-describedby": "email-error"}) }}
-            {% if form.email.errors %}
-                <span id="email-error" class="text-red-600 text-sm">{{ form.email.errors[0] }}</span>
-            {% endif %}
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700" for="{{ form.password.id }}">{{ form.password.label }}</label>
-            {{ form.password(class_="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300", required="required", **{"aria-describedby": "password-error"}) }}
-            {% if form.password.errors %}
-                <span id="password-error" class="text-red-600 text-sm">{{ form.password.errors[0] }}</span>
-            {% endif %}
-        </div>
-        <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition-colors duration-200">Login</button>
-    </form>
-    <div class="mt-4 text-center space-y-2">
-        <p>
-            Don't have an account? <a href="{{ url_for('main.register') }}" class="text-blue-600 hover:underline">Register</a>
-        </p>
-        <p>
-            <a href="{{ url_for('main.reset_password') }}" class="text-blue-600 hover:underline">Forgot Password?</a>
+    <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+        <form method="POST" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="email" name="email" class="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+                {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                        <p class="text-red-600">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" name="password" class="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <p class="text-red-600">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-md transition-colors duration-200">Login</button>
+        </form>
+        <p class="mt-4 text-center">
+            Don't have an account? <a href="{{ url_for('main.register') }}" class="text-blue-600">Register here</a>.
         </p>
     </div>
-</div>
-<script>
-    document.getElementById('login-form').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const form = event.target;
-        const formData = new FormData(form);
-        try {
-            const response = await fetch('{{ url_for("main.login") }}', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-            if (response.ok) {
-                localStorage.setItem('access_token', data.access_token);
-                // Redirect based on user role
-                const role = data.role;
-                if (role === 'teacher' || role === 'admin') {
-                    window.location.href = '{{ url_for("main.teacher_home") }}';
-                } else if (role === 'student') {
-                    window.location.href = '{{ url_for("main.student_home") }}';
-                } else {
-                    window.location.href = '{{ url_for("main.index") }}';
-                }
-            } else {
-                // Display error message
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'text-red-600 text-sm mt-2';
-                errorDiv.textContent = data.msg || 'Login failed. Please try again.';
-                form.insertBefore(errorDiv, form.firstChild);
-            }
-        } catch (error) {
-            console.error('Error during login:', error);
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'text-red-600 text-sm mt-2';
-            errorDiv.textContent = 'An error occurred. Please try again.';
-            form.insertBefore(errorDiv, form.firstChild);
-        }
-    });
-</script>
 {% endblock %}

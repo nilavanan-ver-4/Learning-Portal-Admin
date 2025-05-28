@@ -1,15 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Logout</title>
-    <script>
-        // Clear the JWT token from localStorage
-        localStorage.removeItem('access_token');
-        // Redirect to the login page
-        window.location.href = '{{ url_for("main.login") }}';
-    </script>
-</head>
-<body>
-    <p>Logging out...</p>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Logout - Learning Portal{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}?v=4">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Logged Out</h2>
+    <p class="text-center text-gray-600">You have been successfully logged out.</p>
+    <div class="mt-4 text-center">
+        <a href="{{ url_for('main.login') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200">Login Again</a>
+    </div>
+</div>
+<script>
+    // Clear token on page load
+    localStorage.removeItem('access_token');
+</script>
+{% endblock %}

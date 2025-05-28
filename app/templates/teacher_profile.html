@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Profile{% endblock %}
+
+{% block content %}
+    <h1>Your Profile</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <div>
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+        </div>
+        <div>
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+        </div>
+        <div>
+            <label for="bio">Bio:</label>
+            <textarea id="bio" name="bio">{{ profile.bio if profile.bio else '' }}</textarea>
+        </div>
+        <div>
+            <label for="profile_picture">Profile Picture:</label>
+            <input type="file" id="profile_picture" name="profile_picture">
+            {% if profile.profile_picture_url %}
+                <p>Current: <img src="{{ profile.profile_picture_url }}" alt="Profile Picture" width="100"></p>
+            {% endif %}
+        </div>
+        <button type="submit">Update Profile</button>
+    </form>
+
+    <h2>Your Courses</h2>
+    {% if courses %}
+        <ul>
+            {% for course in courses %}
+                <li>{{ course.title }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no courses yet.</p>
+    {% endif %}
+{% endblock %}

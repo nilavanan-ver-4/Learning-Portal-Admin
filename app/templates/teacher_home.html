@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Home{% endblock %}
+
+{% block content %}
+    <h1>Welcome, {{ user.first_name }} {{ user.last_name }}!</h1>
+    <h2>Your Courses</h2>
+    {% if courses %}
+        <ul>
+            {% for course in courses %}
+                <li>
+                    <a href="{{ url_for('main.view_course', course_id=course.course_id) }}">{{ course.title }}</a>
+                    <a href="{{ url_for('main.create_chapter', course_id=course.course_id) }}">Add Chapter</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no courses yet.</p>
+    {% endif %}
+    <a href="{{ url_for('main.create_course') }}">Create a New Course</a>
+{% endblock %}
